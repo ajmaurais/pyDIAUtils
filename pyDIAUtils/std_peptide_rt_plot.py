@@ -6,9 +6,21 @@ from matplotlib.ticker import MaxNLocator
 
 
 def peptide_rt_plot(protein_id, conn, fname=None, dpi=250):
+    '''
+    Make RT distribution plot for all the precursors in a protein_id.
+
+    Parameters
+    ----------
+    protein_id: str
+        The protein_id to plot.
+    conn:
+        Database connection
+    fname: str
+        (optional) filename to write plot to.
+    '''
 
     query = '''
-        SELECT
+    SELECT
         r.acquiredRank,
         p.modifiedSequence,
         p.precursorCharge,
@@ -18,8 +30,10 @@ def peptide_rt_plot(protein_id, conn, fname=None, dpi=250):
     FROM precursors p
     LEFT JOIN replicates r
         ON p.replicateId = r.replicateId
+	LEFT JOIN peptideToProtein ptp
+		ON p.modifiedSequence == ptp.modifiedSequence
 	LEFT JOIN proteins prot
-		ON prot.proteinID == p.proteinId
+		ON prot.proteinId == ptp.proteinId
     WHERE prot.name = "%s";
     ''' % protein_id
 
@@ -69,11 +83,4 @@ def peptide_rt_plot(protein_id, conn, fname=None, dpi=250):
     else:
         plt.show()
     plt.close()
-
-# std_proteins = ['iRT']
-# # conn = sqlite3.connect('/home/ajm/code/DIA_QC_report/testData/data.db3')
-# conn = sqlite3.connect('/home/ajm/code/DIA_QC_report/testData/full_data.db3')
-# 
-# peptide_rt_plot(std_proteins[0], conn, 'fig/rt_plot.pdf')
-# conn.close()
 

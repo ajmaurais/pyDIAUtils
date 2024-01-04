@@ -42,38 +42,3 @@ def bar_chart(dat, ylab, xlab='Acquisition order', legend_title=None, fname=None
         plt.show()
     plt.close()
 
-
-# read precursors from db
-# query = '''
-# SELECT 
-#     r.acquiredRank,
-#     p.peptide,
-#     p.modifiedSequence,
-#     p.precursorCharge
-# FROM precursors p
-# LEFT JOIN replicates r
-#     ON p.replicateId = r.replicateId
-# WHERE p.totalAreaFragment > 0;
-# '''
-
-# # conn = sqlite3.connect('/home/ajm/code/DIA_QC_report/testData/data.db3')
-# conn = sqlite3.connect('/home/ajm/code/DIA_QC_report/testData/full_data.db3')
-# df = pd.read_sql(query, conn)
-# df = df.drop_duplicates()
-# 
-# # precursor bar chart colored by missed cleavages
-# trypsin_re = re.compile('([RK])(?=[^P])')
-# df['nMissed'] = df['peptide'].apply(lambda x: len(trypsin_re.findall(x)))
-# agg = df.groupby(["acquiredRank", "nMissed"])["nMissed"].agg(["count"]).reset_index()
-# agg = agg.pivot_table(index='acquiredRank', columns='nMissed', values='count')
-# bar_chart(agg, 'Number of precursors', legend_title='Missed cleavages', fname='fig/n_missed_dist.pdf')
-# 
-# # precursor bar chart colored by precursorCharge
-# agg = df.groupby(["acquiredRank", "precursorCharge"])["precursorCharge"].agg(["count"]).reset_index()
-# agg = agg.pivot_table(index='acquiredRank', columns='precursorCharge', values='count')
-# bar_chart(agg, 'Number of precursors', legend_title='Missed cleavages', fname='fig/peptide_charge_dist.pdf')
-# 
-# # replicate tic bar chart
-# tic = pd.read_sql('SELECT acquiredRank, ticArea FROM replicates', conn)
-# bar_chart(tic, 'TIC area', fname='fig/replicate_tics.pdf')
-
