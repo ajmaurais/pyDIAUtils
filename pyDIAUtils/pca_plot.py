@@ -10,6 +10,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 
+from .metadata import Dtype
 
 def pc_matrix(df):
     df_s = StandardScaler().fit_transform(df.transpose())
@@ -63,27 +64,20 @@ def pca_plot(pc, label_col, pc_var, label_type='discrete',
 
 def convert_string_cols(df):
     '''
-    Convert string columns in DataFrame to float or int if all values in column match a
-    regular expression.
+    Convert string annotation key columns in DataFrame to annotationType
     '''
-    float_re = re.compile(r'^[+-]?[0-9]+\.[0-9]?$')
-    int_re = re.compile(r'^[+-]?[0-9]+$')
+    
+    ret = df.set_index('key')
 
-    def rank_types(x):
-        if int_re.search(x):
-            return 1
-        if float_re.search(x):
-            return 2
-        return 3
+    # consolidate differing data types
+    ret['type'] = ret['type'].apply(lambda x: Dtype[x])
+    ret['type'] = ret.groupby('key')['type'].max()
+    ret = ret.reset_index()
+    
+    types = {row.key: row.type for row in ret[['key', 'type']].drop_duplicates().itertuples()}
+    ret = ret.pivot(index="replicateId", columns="key", values="value")
+    for column in ret.columns:
+        ret[column] = ret[column].apply(lambda x: types[column].convert(x))
 
-    ret = df
-    if len(ret.index) > 0:
-        for col in df.columns:
-            if isinstance(df[col][0], str):
-                type_rank = min(df[col].apply(rank_types))
-                if type_rank == 1:
-                    df[col] = df[col].apply(int)
-                elif type_rank == 2:
-                    df[col] = df[col].apply(float)
-    return ret
+    return ret.rename_axis(columns=None).reset_index()
 
