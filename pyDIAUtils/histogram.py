@@ -57,3 +57,66 @@ def box_plot(data, ylab, xlab='Acquisition number', fname=None, hline=None, limi
         plt.show()
     plt.close()
 
+
+def multi_boxplot(dats, data_levels,
+                  xlab='Log2(Area)', ylab='Acquisition number',
+                  fname=None, dpi=250):
+    '''
+    Draw vertical box plots with a column for each level in data_levels.
+
+    Parameters
+    ----------
+    dats: dict
+        A dict where the key is the data level name and the value is a
+        wide formated pd.DataFrame
+    data_levels: dict
+        A dict where the key is the data level name and the value is the
+        index of the level.
+    xlab: str
+        X axis label
+    ylab: str
+        Y axis label
+    fname: str
+        The name of the file to save the plot.
+    dpi: int
+        250 is the default.
+    '''
+
+    fig, axs = plt.subplots(1, len(data_levels),
+                            figsize = (len(data_levels) * 2,
+                                       len(data_levels) * 3),
+                            dpi=dpi)
+
+    if len(data_levels) == 1:
+        axs = [axs]
+
+    # iterate through each level
+    for level, index in data_levels.items():
+
+        # plot outliers as scatter
+        for i, c in enumerate(dats[level].columns):
+            y = dats[level][c]
+            q3, q1 = np.percentile(y, [75, 25])
+            iqr = q3 - q1
+            outliers = y[(y > q3 + (1.5 * iqr)) | (y < q1 - (1.5 * iqr))]
+            x = np.random.normal(i + 1, 0.04, size=len(outliers))
+            axs[index].scatter(outliers, x, c = 'black', s = 0.3, alpha = 0.5)
+
+        axs[index].boxplot(dats[level], showfliers=False, vert=False)
+
+        axs[index].set_xlabel(xlab)
+
+        if index == 0:
+            axs[index].set_ylabel(ylab)
+
+        n_cols = len(dats[level].columns)
+        axs[index].set_yticks(np.linspace(1, n_cols, num=min(6, n_cols), dtype=int),
+                              np.linspace(0, n_cols - 1, num=min(6, n_cols), dtype=int))
+        axs[index].set_title(level)
+
+    if fname:
+        plt.savefig(fname)
+    else:
+        plt.show()
+    plt.close()
+
