@@ -1,14 +1,10 @@
 
-import re
-
-from statistics import stdev
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from sklearn.manifold import TSNE
 
 from .metadata import Dtype
 
@@ -66,14 +62,14 @@ def convert_string_cols(df):
     '''
     Convert string annotation key columns in DataFrame to annotationType
     '''
-    
+
     ret = df.set_index('key')
 
     # consolidate differing data types
     ret['type'] = ret['type'].apply(lambda x: Dtype[x])
     ret['type'] = ret.groupby('key')['type'].max()
     ret = ret.reset_index()
-    
+
     types = {row.key: row.type for row in ret[['key', 'type']].drop_duplicates().itertuples()}
     ret = ret.pivot(index="replicateId", columns="key", values="value")
     for column in ret.columns:

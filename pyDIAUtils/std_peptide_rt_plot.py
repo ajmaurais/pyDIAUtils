@@ -62,7 +62,7 @@ def peptide_rt_plot(protein_id, conn, fname=None, dpi=250):
     ax.legend(handles = [Patch(color=color, label=label) for label, color in colors.items()],
               bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
 
-    ax.set_xlabel('Acquisition order')
+    ax.set_xlabel('Acquisition number')
     ax.set_ylabel('RT (min)')
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 

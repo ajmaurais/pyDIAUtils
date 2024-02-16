@@ -22,7 +22,7 @@ def histogram(dat, xlab, ylab='Count', limits=None, fname=None, dpi=250):
     plt.close()
 
 
-def box_plot(data, ylab, xlab='Acquired rank', fname=None, hline=None, limits=None, dpi=250):
+def box_plot(data, ylab, xlab='Acquisition number', fname=None, hline=None, limits=None, dpi=250):
 
     # init plot
     fig, ax = plt.subplots(1, 1, figsize = (10, 4), dpi=dpi)

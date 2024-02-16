@@ -6,7 +6,7 @@ import numpy as np
 import re
 
 
-def bar_chart(dat, ylab, xlab='Acquisition order', legend_title=None, fname=None, dpi=250):
+def bar_chart(dat, ylab, xlab='Acquisition number', legend_title=None, fname=None, dpi=250):
 
     '''
     Make bar chart from aggregated bar chart.
