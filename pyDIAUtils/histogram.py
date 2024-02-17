@@ -62,7 +62,7 @@ def multi_boxplot(dats, data_levels,
                   xlab='Acquisition number', ylab='Log2(Area)',
                   fname=None, dpi=250):
     '''
-    Draw vertical box plots with a column for each level in data_levels.
+    Draw box plots with a row for each level in data_levels.
 
     Parameters
     ----------
