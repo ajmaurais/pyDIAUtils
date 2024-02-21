@@ -63,15 +63,8 @@ def convert_string_cols(df):
     Convert string annotation key columns in DataFrame to annotationType
     '''
 
-    ret = df.set_index('key')
-
-    # consolidate differing data types
-    ret['type'] = ret['type'].apply(lambda x: Dtype[x])
-    ret['type'] = ret.groupby('key')['type'].max()
-    ret = ret.reset_index()
-
-    types = {row.key: row.type for row in ret[['key', 'type']].drop_duplicates().itertuples()}
-    ret = ret.pivot(index="replicateId", columns="key", values="value")
+    types = {row.key: Dtype[row.type] for row in df[['key', 'type']].drop_duplicates().itertuples()}
+    ret = df.pivot(index="replicateId", columns="key", values="value")
     for column in ret.columns:
         ret[column] = ret[column].apply(lambda x: types[column].convert(x))
 
