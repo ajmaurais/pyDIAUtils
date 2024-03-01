@@ -11,6 +11,8 @@ METADATA_TIME_FORMAT = '%m/%d/%Y %H:%M:%S'
 
 PRECURSOR_KEY_COLS = ('replicateId', 'modifiedSequence', 'precursorCharge')
 
+SCHEMA_VERSION = '1.9'
+
 SCHEMA = [
 '''
 CREATE TABLE replicates (
@@ -139,6 +141,14 @@ def get_meta_value(conn, key):
         return value[0][0]
     LOGGER.error(f"Could not get key '{key}' from metadata table!")
     return None
+
+
+def check_schema_version(conn):
+    db_version = get_meta_value(conn, 'schema_version')
+    if db_version is None or db_version != SCHEMA_VERSION:
+        LOGGER.error(f'Database schema version ({db_version}) does not match program ({SCHEMA_VERSION})')
+        return False
+    return True
 
 
 def update_meta_value(conn, key, value):
