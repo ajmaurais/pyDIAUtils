@@ -11,9 +11,9 @@ METADATA_TIME_FORMAT = '%m/%d/%Y %H:%M:%S'
 
 PRECURSOR_KEY_COLS = ('replicateId', 'modifiedSequence', 'precursorCharge')
 
-SCHEMA_VERSION = '1.9'
+SCHEMA_VERSION = '1.10'
 
-SCHEMA = [
+SCHEMA = ['PRAGMA foreign_keys = ON',
 '''
 CREATE TABLE replicates (
     replicateId INTEGER PRIMARY KEY,
@@ -41,7 +41,13 @@ CREATE TABLE precursors (
     libraryDotProduct REAL,
     isotopeDotProduct REAL,
     PRIMARY KEY ({', '.join(PRECURSOR_KEY_COLS)}),
-    FOREIGN KEY (replicateId) REFERENCES replicates(replicateId)
+    FOREIGN KEY (replicateId) REFERENCES replicates(replicateId) ON DELETE CASCADE
+)''',
+'''
+CREATE TABLE sampleMetadataTypes (
+    annotationKey TEXT NOT NULL,
+    annotationType VARCHAR(6) CHECK( annotationType IN ('BOOL', 'INT', 'FLOAT', 'STRING')) NOT NULL DEFAULT 'STRING',
+    PRIMARY KEY (annotationKey)
 )''',
 '''
 CREATE TABLE sampleMetadata (
@@ -49,14 +55,8 @@ CREATE TABLE sampleMetadata (
     annotationKey TEXT NOT NULL,
     annotationValue TEXT,
     PRIMARY KEY (replicateId, annotationKey),
-    FOREIGN KEY (replicateId) REFERENCES replicates(replicateId)
-    FOREIGN KEY (annotationKey) REFERENCES sampleMetadataTypes(annotationKey)
-)''',
-'''
-CREATE TABLE sampleMetadataTypes (
-    annotationKey TEXT NOT NULL,
-    annotationType VARCHAR(6) CHECK( annotationType IN ('BOOL', 'INT', 'FLOAT', 'STRING')) NOT NULL DEFAULT 'STRING',
-    PRIMARY KEY (annotationKey)
+    FOREIGN KEY (replicateId) REFERENCES replicates(replicateId) ON DELETE CASCADE,
+    FOREIGN KEY (annotationKey) REFERENCES sampleMetadataTypes(annotationKey) ON DELETE CASCADE
 )''',
 '''
 CREATE TABLE metadata (
@@ -78,16 +78,15 @@ CREATE TABLE proteinQuants (
     abundance REAL,
     normalizedAbundance REAL,
     PRIMARY KEY (replicateId, proteinId),
-    FOREIGN KEY (replicateId) REFERENCES replicates(replicateId),
-    FOREIGN KEY (proteinId) REFERENCES proteins(proteinId)
+    FOREIGN KEY (replicateId) REFERENCES replicates(replicateId) ON DELETE CASCADE,
+    FOREIGN KEY (proteinId) REFERENCES proteins(proteinId) ON DELETE CASCADE
 )''',
 '''
 CREATE TABLE peptideToProtein (
     proteinId INTEGER NOT NULL,
     modifiedSequence VARCHAR(200) NOT NULL,
     PRIMARY KEY (modifiedSequence, proteinId),
-    FOREIGN KEY (proteinId) REFERENCES proteins(proteinId),
-    FOREIGN KEY (modifiedSequence) REFERENCES precursors(modifiedSequence)
+    FOREIGN KEY (proteinId) REFERENCES proteins(proteinId) ON DELETE CASCADE
 )''']
 
 
