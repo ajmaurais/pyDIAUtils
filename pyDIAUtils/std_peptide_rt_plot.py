@@ -34,7 +34,7 @@ def peptide_rt_plot(protein_id, conn, fname=None, dpi=250):
 		ON p.modifiedSequence == ptp.modifiedSequence
 	LEFT JOIN proteins prot
 		ON prot.proteinId == ptp.proteinId
-    WHERE prot.name = "%s";
+    WHERE prot.name = "%s" AND r.includeRep == TRUE;
     ''' % protein_id
 
     df = pd.read_sql(query, conn)

@@ -11,7 +11,7 @@ METADATA_TIME_FORMAT = '%m/%d/%Y %H:%M:%S'
 
 PRECURSOR_KEY_COLS = ('replicateId', 'modifiedSequence', 'precursorCharge')
 
-SCHEMA_VERSION = '1.10'
+SCHEMA_VERSION = '1.12'
 
 SCHEMA = ['PRAGMA foreign_keys = ON',
 '''
@@ -19,6 +19,7 @@ CREATE TABLE replicates (
     replicateId INTEGER PRIMARY KEY,
     replicate TEXT NOT NULL,
     project TEXT NOT NULL,
+    includeRep BOOL NOT NULL DEFAULT TRUE,
     acquiredTime BLOB NOT NULL,
     acquiredRank INTEGER NOT NULL,
     ticArea REAL NOT NULL,
@@ -184,11 +185,11 @@ def update_acquired_ranks(conn):
         Database connection.
     '''
 
-    replicates = pd.read_sql('SELECT replicateId, acquiredTime FROM replicates;', conn)
+    replicates = pd.read_sql('SELECT replicateId, acquiredTime FROM replicates WHERE includeRep == TRUE;', conn)
 
     # parse acquired times and add acquiredRank
     replicates['acquiredTime'] = replicates['acquiredTime'].apply(lambda x: datetime.strptime(x, METADATA_TIME_FORMAT))
-    ranks = [(rank, i) for rank, i in enumerate(replicates['acquiredTime'].sort_values().index)]
+    ranks = list(enumerate(replicates['acquiredTime'].sort_values().index))
     replicates['acquiredRank'] = [x[0] for x in sorted(ranks, key=lambda x: x[1])]
 
     acquired_ranks = [(row.acquiredRank, row.replicateId) for row in replicates.itertuples()]
