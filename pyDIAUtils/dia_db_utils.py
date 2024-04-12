@@ -329,14 +329,16 @@ def validate_bit_mask(mask, n_options=3, n_digits=2):
     mask: str
         Bit mask.
     n_options: tuple
-        Number of options either 2, or 3.
+        Number of options. (1-3)
     n_digits: int
         Expected number of digits in mask.
     '''
 
-    assert n_options in (2, 3)
+    assert n_options in range(4)
 
-    max_value = 7 if n_options == 3 else 1
+    max_values = (0, 1, 3, 7)
+
+    max_value = max_values[n_options]
     if not re.search(f"^[0-{str(max_value)}]+$", mask):
         LOGGER.error(f'Bit mask digits must be between 0 and {str(max_value)}!')
         return False
@@ -369,14 +371,16 @@ def parse_bitmask_options(mask, digit_names, options):
     '''
 
     assert len(digit_names) == len(mask)
-    assert len(options) == 3
+    # assert len(options) == 3
+    n_options = len(options)
 
     def _parse_bitmask(mask):
         mask_a = [int(c) for c in mask]
         for digit in mask_a:
-            yield [bool(digit & (1 << i)) for i in range(3)]
+            yield [bool(digit & (1 << i)) for i in range(n_options)]
 
     ret = dict()
     for key, value in zip(digit_names, _parse_bitmask(mask)):
         ret[key] = dict(zip(options, value))
     return ret
+
